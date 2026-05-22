@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Tasks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"] {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        input[type="date"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📝 Todo Tasks</h1>
+
+        <div class="task-form">
+            <input type="text" id="taskInput" placeholder="Escribe una nueva tarea...">
+            <input type="date" id="deadlineInput">
+            <button onclick="addTask()">Agregar</button>
+        </div>
+
+        <ul class="task-list" id="taskList">
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <p>No hay tareas. ¡Agrega una nueva!</p>
+            </div>
+        </ul>
+    </div>
+
+    <script>
+        let tasks = [];
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/all-tasks');
+                tasks = await response.json();
+                renderTasks();
+            } catch (error) {
+                console.error('Error cargando tareas:', error);
+            }
+        }
+
+        async function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const deadlineInput = document.getElementById('deadlineInput');
+            const name = taskInput.value.trim();
+            const deadline = deadlineInput.value ? new Date(deadlineInput.value) : new Date();
+
+            if (!name) return;
+
+            try {
+                const response = await fetch('/api/create-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        TaskId: Date.now(),
+                        Name: name,
+                        Deadline: deadline
+                    })
+                });
+
+                if (response.ok) {
+                    taskInput.value = '';
+                    deadlineInput.value = '';
+                    loadTasks();
+                }
+            } catch (error) {
+                console.error('Error agregando tarea:', error);
+            }
+        }
+
+        async function deleteTask(taskId) {
+            try {
+                await fetch('/api/delete-task', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ TaskId: taskId })
+                });
+                loadTasks();
+            } catch (error) {
+                console.error('Error eliminando tarea:', error);
+            }
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>No hay tareas. ¡Agrega una nueva!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            taskList.innerHTML = tasks.map(task => `
+                <li class="task-item">
+                    <div class="task-content">
+                        <div class="task-title">${task.Name}</div>
+                        ${task.Deadline ? `<div class="task-description">${new Date(task.Deadline).toLocaleDateString()}</div>` : ''}
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-delete" onclick="deleteTask(${task.TaskId})">Eliminar</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // Enter key para agregar tarea
+        document.getElementById('taskInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Cargar tareas al iniciar
+        loadTasks();
+    </script>
+</body>
+
+</html>
