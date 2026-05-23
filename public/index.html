@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Tasks</title>
+    <!-- Importar Outfit de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Enlace a estilos CSS externos -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- Interfaz de Autenticación Premium -->
+    <div class="auth-container" id="authApp">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 id="authTitle">Iniciar Sesión</h2>
+                <p id="authSubtitle">Ingresa tus credenciales para acceder a tus tareas</p>
+            </div>
+
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Ingresar</button>
+                <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Registrarse</button>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+                <div class="auth-form-group">
+                    <label for="usernameInput">Usuario</label>
+                    <input type="text" id="usernameInput" class="auth-input" placeholder="Tu nombre de usuario" required autocomplete="username">
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="passwordInput">Contraseña</label>
+                    <input type="password" id="passwordInput" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-auth-submit" id="authSubmitBtn">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interfaz de Tareas -->
+    <div id="todoApp">
+        <div class="container">
+            <!-- Header de Perfil -->
+            <div class="todo-header">
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <div class="user-info">
+                        <span class="username-display" id="usernameDisplay">Usuario</span>
+                        <span class="user-role">Organizador de Tareas</span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+            </div>
+
+            <h1>📝 Todo Tasks</h1>
+
+            <div class="task-form">
+                <input type="text" id="taskInput" placeholder="Escribe una nueva tarea...">
+                <input type="date" id="deadlineInput">
+                <button onclick="addTask()">Agregar</button>
+            </div>
+
+            <ul class="task-list" id="taskList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <p>No hay tareas. ¡Agrega una nueva!</p>
+                </div>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Enlace a JavaScript externo -->
+    <script src="/js/app.js"></script>
+</body>
+
+</html>
